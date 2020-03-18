@@ -18,6 +18,8 @@ server:
 spring:
   application:
     name: foodie-user-service
+  main:
+    allow-bean-definition-overriding: true
   profiles:
     active: dev
   datasource:                                           # 数据源的相关配置

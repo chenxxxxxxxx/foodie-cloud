@@ -1,6 +1,7 @@
 package com.imooc.item.service;
 
 import com.imooc.pojo.PagedGridResult;
+import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
@@ -8,6 +9,7 @@ import java.util.Map;
 /**
  * Created by 半仙.
  */
+@FeignClient(value = "foodie-item-service")
 @RequestMapping("item-comments-api")
 public interface ItemCommentsService {
 

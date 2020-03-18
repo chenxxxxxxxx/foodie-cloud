@@ -1,6 +1,7 @@
 package com.imooc.order.service.impl.center;
 
 import com.imooc.enums.YesOrNo;
+import com.imooc.item.service.ItemCommentsService;
 import com.imooc.order.mapper.OrderItemsMapper;
 import com.imooc.order.mapper.OrderStatusMapper;
 import com.imooc.order.mapper.OrdersMapper;
@@ -28,25 +29,25 @@ import java.util.Map;
 @Service
 public class MyCommentsServiceImpl extends BaseService implements MyCommentsService {
 
-    @Autowired
-    public OrderItemsMapper orderItemsMapper;
+    private final OrderItemsMapper orderItemsMapper;
+    private final OrdersMapper ordersMapper;
+    private final OrderStatusMapper orderStatusMapper;
+    private final ItemCommentsService itemCommentsService;
+    private final Sid sid;
 
     @Autowired
-    public OrdersMapper ordersMapper;
+    public MyCommentsServiceImpl(OrderItemsMapper orderItemsMapper,
+                                 OrdersMapper ordersMapper,
+                                 OrderStatusMapper orderStatusMapper,
+                                 ItemCommentsService itemCommentsService,
+                                 Sid sid) {
+        this.orderItemsMapper = orderItemsMapper;
+        this.ordersMapper = ordersMapper;
+        this.orderStatusMapper = orderStatusMapper;
+        this.itemCommentsService = itemCommentsService;
+        this.sid = sid;
+    }
 
-    @Autowired
-    public OrderStatusMapper orderStatusMapper;
-
-//    @Autowired
-//    public ItemsCommentsMapperCustom itemsCommentsMapperCustom;
-    // TODO feign章节里改成item-api
-    @Autowired
-    private LoadBalancerClient client;
-    @Autowired
-    private RestTemplate restTemplate;
-
-    @Autowired
-    private Sid sid;
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -68,14 +69,7 @@ public class MyCommentsServiceImpl extends BaseService implements MyCommentsServ
         Map<String, Object> map = new HashMap<>();
         map.put("userId", userId);
         map.put("commentList", commentList);
-//        itemsCommentsMapperCustom.saveComments(map);
-
-        ServiceInstance instance = client.choose("FOODIE-ITEM-SERVICE");
-        String url = String.format("http://%s:%s/item-comments-api/saveComments",
-                instance.getHost(),
-                instance.getPort());
-        // TODO 偷个懒，不判断返回status，等下个章节用Feign重写
-        restTemplate.postForLocation(url, map);
+        itemCommentsService.saveComments(map);
 
         // 2. 修改订单表改已评价 orders
         Orders order = new Orders();
