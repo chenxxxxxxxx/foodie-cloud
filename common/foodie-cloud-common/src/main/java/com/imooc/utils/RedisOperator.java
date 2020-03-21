@@ -1,41 +1,140 @@
 package com.imooc.utils;
 
+import lombok.extern.slf4j.Slf4j;
+import org.redisson.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.dao.DataAccessException;
-import org.springframework.data.redis.connection.RedisConnection;
-import org.springframework.data.redis.connection.StringRedisConnection;
-import org.springframework.data.redis.core.RedisCallback;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
 
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.TimeUnit;
 
 /**
  * @Title: Redis 工具类
- * @author 慕课网
  */
 @Component
+@Slf4j
 public class RedisOperator {
-	
-//	@Autowired
-//    private RedisTemplate<String, Object> redisTemplate;
-	
+
+	private final RedissonClient redissonClient;
+
 	@Autowired
-	private StringRedisTemplate redisTemplate;
-	
-	// Key（键），简单的key-value操作
+	public RedisOperator(RedissonClient redissonClient){
+		this.redissonClient = redissonClient;
+	}
 
 	/**
-	 * 实现命令：TTL key，以秒为单位，返回给定 key的剩余生存时间(TTL, time to live)。
-	 * 
-	 * @param key
+	 * 获取字符串对象
+	 *
+	 * @param objectName
+	 * @param <T>
 	 * @return
 	 */
-	public long ttl(String key) {
-		return redisTemplate.getExpire(key);
+	public <T> RBucket<T> getRBucket(String objectName){
+		RBucket<T> bucket=redissonClient.getBucket(objectName);
+		return bucket;
+	}
+
+	/**
+	 * 获取Map对象
+	 *
+	 * @param objectName
+	 * @return
+	 */
+	public <K,V> RMap<K, V> getRMap(String objectName){
+		RMap<K, V> map=redissonClient.getMap(objectName);
+		return map;
+	}
+
+	/**
+	 * 获取有序集合
+	 *
+	 * @param objectName
+	 * @return
+	 */
+	public <V> RSortedSet<V> getRSortedSet(String objectName){
+		RSortedSet<V> sortedSet=redissonClient.getSortedSet(objectName);
+		return sortedSet;
+	}
+
+	/**
+	 * 获取集合
+	 * @param objectName
+	 * @return
+	 */
+	public <V> RSet<V> getRSet(String objectName){
+		RSet<V> rSet=redissonClient.getSet(objectName);
+		return rSet;
+	}
+
+	/**
+	 * 获取列表
+	 * @param objectName
+	 * @return
+	 */
+	public <V> RList<V> getRList(String objectName){
+		RList<V> rList=redissonClient.getList(objectName);
+		return rList;
+	}
+
+	/**
+	 * 获取队列
+	 *
+	 * @param objectName
+	 * @return
+	 */
+	public <V> RQueue<V> getRQueue(String objectName){
+		RQueue<V> rQueue=redissonClient.getQueue(objectName);
+		return rQueue;
+	}
+
+	/**
+	 * 获取双端队列
+	 *
+	 * @param objectName
+	 * @return
+	 */
+	public <V> RDeque<V> getRDeque(String objectName){
+		RDeque<V> rDeque=redissonClient.getDeque(objectName);
+		return rDeque;
+	}
+
+	/**
+	 * 根据name进行加锁操作
+	 *
+	 * @param lockName
+	 * @param leaseTime 锁定时长
+	 * @param unit 锁定时长单位
+	 */
+	public void lock(String lockName, long leaseTime, TimeUnit unit) {
+		RLock lock = redissonClient.getLock(lockName);
+		//lock提供带timeout参数，timeout结束强制解锁，防止死锁 ：1分钟
+		lock.lock(leaseTime, unit);
+	}
+
+	/**
+	 * 根据name进行解锁操作，与lock一一对应
+	 *
+	 * @param lockName
+	 */
+	public void unlock(String lockName) {
+		RLock lock = redissonClient.getLock(lockName);
+		lock.unlock();
+	}
+
+	/**
+	 * 尝试获取锁
+	 * @param lockKey
+	 * @param unit 时间单位
+	 * @param waitTime 最多等待时间
+	 * @param leaseTime 上锁后自动释放锁时间
+	 * @return
+	 */
+	public boolean tryLock(String lockKey, TimeUnit unit, int waitTime, int leaseTime) {
+		RLock lock = redissonClient.getLock(lockKey);
+		try {
+			return lock.tryLock(waitTime, leaseTime, unit);
+		} catch (InterruptedException e) {
+			return false;
+		}
 	}
 	
 	/**
@@ -45,7 +144,13 @@ public class RedisOperator {
 	 * @return
 	 */
 	public void expire(String key, long timeout) {
-		redisTemplate.expire(key, timeout, TimeUnit.SECONDS);
+		RBucket<Object> bucket = redissonClient.getBucket(key);
+		boolean exists = bucket.isExists();
+		if(!exists){
+			log.warn("RedisOperator expire warn, the key : {} is not exists!", key);
+			return;
+		}
+		bucket.expire(timeout, TimeUnit.SECONDS);
 	}
 	
 	/**
@@ -55,14 +160,14 @@ public class RedisOperator {
 	 * @return
 	 */
 	public long incr(String key, long delta) {
-		return redisTemplate.opsForValue().increment(key, delta);
-	}
-
-	/**
-	 * 实现命令：KEYS pattern，查找所有符合给定模式 pattern的 key
-	 */
-	public Set<String> keys(String pattern) {
-		return redisTemplate.keys(pattern);
+		RBucket<Object> bucket = redissonClient.getBucket(key);
+		boolean exists = bucket.isExists();
+		if(!exists){
+			log.warn("RedisOperator incr warn, the key : {} is not exists!", key);
+			return -0L;
+		}
+		RAtomicLong atomicLong = redissonClient.getAtomicLong(key);
+		return atomicLong.incrementAndGet();
 	}
 
 	/**
@@ -71,10 +176,14 @@ public class RedisOperator {
 	 * @param key
 	 */
 	public void del(String key) {
-		redisTemplate.delete(key);
+		RBucket<Object> bucket = redissonClient.getBucket(key);
+		boolean exists = bucket.isExists();
+		if(!exists){
+			log.warn("RedisOperator del warn, the key : {} is not exists!", key);
+			return;
+		}
+		bucket.delete();
 	}
-
-	// String（字符串）
 
 	/**
 	 * 实现命令：SET key value，设置一个key-value（将字符串值 value关联到 key）
@@ -83,7 +192,8 @@ public class RedisOperator {
 	 * @param value
 	 */
 	public void set(String key, String value) {
-		redisTemplate.opsForValue().set(key, value);
+		RBucket<Object> bucket = redissonClient.getBucket(key);
+		bucket.set(value);
 	}
 
 	/**
@@ -95,130 +205,9 @@ public class RedisOperator {
 	 *            （以秒为单位）
 	 */
 	public void set(String key, String value, long timeout) {
-		redisTemplate.opsForValue().set(key, value, timeout, TimeUnit.SECONDS);
+		RBucket<Object> bucket = redissonClient.getBucket(key);
+		bucket.set(value, timeout, TimeUnit.SECONDS);
 	}
 
-	/**
-	 * 实现命令：GET key，返回 key所关联的字符串值。
-	 * 
-	 * @param key
-	 * @return value
-	 */
-	public String get(String key) {
-		return (String)redisTemplate.opsForValue().get(key);
-	}
-
-	/**
-	 * 批量查询，对应mget
-	 * @param keys
-	 * @return
-	 */
-	public List<String> mget(List<String> keys) {
-		return redisTemplate.opsForValue().multiGet(keys);
-	}
-
-	/**
-	 * 批量查询，管道pipeline
-	 * @param keys
-	 * @return
-	 */
-	public List<Object> batchGet(List<String> keys) {
-
-//		nginx -> keepalive
-//		redis -> pipeline
-
-		List<Object> result = redisTemplate.executePipelined(new RedisCallback<String>() {
-			@Override
-			public String doInRedis(RedisConnection connection) throws DataAccessException {
-				StringRedisConnection src = (StringRedisConnection)connection;
-
-				for (String k : keys) {
-					src.get(k);
-				}
-				return null;
-			}
-		});
-
-		return result;
-	}
-
-
-	// Hash（哈希表）
-
-	/**
-	 * 实现命令：HSET key field value，将哈希表 key中的域 field的值设为 value
-	 * 
-	 * @param key
-	 * @param field
-	 * @param value
-	 */
-	public void hset(String key, String field, Object value) {
-		redisTemplate.opsForHash().put(key, field, value);
-	}
-
-	/**
-	 * 实现命令：HGET key field，返回哈希表 key中给定域 field的值
-	 * 
-	 * @param key
-	 * @param field
-	 * @return
-	 */
-	public String hget(String key, String field) {
-		return (String) redisTemplate.opsForHash().get(key, field);
-	}
-
-	/**
-	 * 实现命令：HDEL key field [field ...]，删除哈希表 key 中的一个或多个指定域，不存在的域将被忽略。
-	 * 
-	 * @param key
-	 * @param fields
-	 */
-	public void hdel(String key, Object... fields) {
-		redisTemplate.opsForHash().delete(key, fields);
-	}
-
-	/**
-	 * 实现命令：HGETALL key，返回哈希表 key中，所有的域和值。
-	 * 
-	 * @param key
-	 * @return
-	 */
-	public Map<Object, Object> hgetall(String key) {
-		return redisTemplate.opsForHash().entries(key);
-	}
-
-	// List（列表）
-
-	/**
-	 * 实现命令：LPUSH key value，将一个值 value插入到列表 key的表头
-	 * 
-	 * @param key
-	 * @param value
-	 * @return 执行 LPUSH命令后，列表的长度。
-	 */
-	public long lpush(String key, String value) {
-		return redisTemplate.opsForList().leftPush(key, value);
-	}
-
-	/**
-	 * 实现命令：LPOP key，移除并返回列表 key的头元素。
-	 * 
-	 * @param key
-	 * @return 列表key的头元素。
-	 */
-	public String lpop(String key) {
-		return (String)redisTemplate.opsForList().leftPop(key);
-	}
-
-	/**
-	 * 实现命令：RPUSH key value，将一个值 value插入到列表 key的表尾(最右边)。
-	 * 
-	 * @param key
-	 * @param value
-	 * @return 执行 LPUSH命令后，列表的长度。
-	 */
-	public long rpush(String key, String value) {
-		return redisTemplate.opsForList().rightPush(key, value);
-	}
 
 }

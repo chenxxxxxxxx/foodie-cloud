@@ -10,11 +10,9 @@ import com.imooc.item.pojo.vo.CommentLevelCountsVO;
 import com.imooc.item.pojo.vo.ItemCommentVO;
 import com.imooc.item.pojo.vo.ShopcartVO;
 import com.imooc.item.service.ItemService;
-import com.imooc.utils.DesensitizationUtil;
 import com.imooc.pojo.PagedGridResult;
+import com.imooc.utils.DesensitizationUtil;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
@@ -26,18 +24,26 @@ import java.util.*;
 @Slf4j
 public class ItemServiceImpl implements ItemService {
 
-    @Autowired
-    private ItemsMapper itemsMapper;
-    @Autowired
-    private ItemsImgMapper itemsImgMapper;
-    @Autowired
-    private ItemsSpecMapper itemsSpecMapper;
-    @Autowired
-    private ItemsParamMapper itemsParamMapper;
-    @Autowired
-    private ItemsCommentsMapper itemsCommentsMapper;
-    @Autowired
-    private ItemsMapperCustom itemsMapperCustom;
+    private final ItemsMapper itemsMapper;
+    private final ItemsImgMapper itemsImgMapper;
+    private final ItemsSpecMapper itemsSpecMapper;
+    private final ItemsParamMapper itemsParamMapper;
+    private final ItemsCommentsMapper itemsCommentsMapper;
+    private final ItemsMapperCustom itemsMapperCustom;
+
+    public ItemServiceImpl(ItemsMapper itemsMapper,
+                           ItemsImgMapper itemsImgMapper,
+                           ItemsSpecMapper itemsSpecMapper,
+                           ItemsParamMapper itemsParamMapper,
+                           ItemsCommentsMapper itemsCommentsMapper,
+                           ItemsMapperCustom itemsMapperCustom) {
+        this.itemsMapper = itemsMapper;
+        this.itemsImgMapper = itemsImgMapper;
+        this.itemsSpecMapper = itemsSpecMapper;
+        this.itemsParamMapper = itemsParamMapper;
+        this.itemsCommentsMapper = itemsCommentsMapper;
+        this.itemsMapperCustom = itemsMapperCustom;
+    }
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
@@ -105,9 +111,9 @@ public class ItemServiceImpl implements ItemService {
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override
     public PagedGridResult queryPagedComments(String itemId,
-                                                  Integer level,
-                                                  Integer page,
-                                                  Integer pageSize) {
+                                              Integer level,
+                                              Integer page,
+                                              Integer pageSize) {
 
         Map<String, Object> map = new HashMap<>();
         map.put("itemId", itemId);
@@ -128,6 +134,7 @@ public class ItemServiceImpl implements ItemService {
 
         return setterPagedGrid(list, page);
     }
+
     private PagedGridResult setterPagedGrid(List<?> list, Integer page) {
         PageInfo<?> pageList = new PageInfo<>(list);
         PagedGridResult grid = new PagedGridResult();
@@ -180,7 +187,7 @@ public class ItemServiceImpl implements ItemService {
 
         // 2. 判断库存，是否能够减少到0以下
 //        if (stock - buyCounts < 0) {
-            // 提示用户库存不够
+        // 提示用户库存不够
 //            10 - 3 -3 - 5 = -1
 //        }
 

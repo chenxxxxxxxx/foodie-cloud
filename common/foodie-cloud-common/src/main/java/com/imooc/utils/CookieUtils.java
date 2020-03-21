@@ -16,10 +16,7 @@ import java.net.URLEncoder;
  * @Title: CookieUtils.java
  * @Package com.imooc.utils
  * @Description: Cookie 工具类
- * Copyright: Copyright (c)
- * Company: www.imooc.com
  *
- * @author imooc
  * @version V1.0
  */
 public final class CookieUtils {
@@ -180,7 +177,6 @@ public final class CookieUtils {
     public static void deleteCookie(HttpServletRequest request, HttpServletResponse response,
             String cookieName) {
         doSetCookie(request, response, cookieName, null, -1, false);
-//        doSetCookie(request, response, cookieName, "", -1, false);
     }
 
     
@@ -278,10 +274,8 @@ public final class CookieUtils {
             final String[] domains = serverName.split("\\.");
             int len = domains.length;
             if (len > 3 && !isIp(serverName)) {
-            	// www.xxx.com.cn
                 domainName = "." + domains[len - 3] + "." + domains[len - 2] + "." + domains[len - 1];
             } else if (len <= 3 && len > 1) {
-                // xxx.com or xxx.cn
                 domainName = "." + domains[len - 2] + "." + domains[len - 1];
             } else {
                 domainName = serverName;

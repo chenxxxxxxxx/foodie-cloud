@@ -9,6 +9,7 @@ import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -22,11 +23,14 @@ import java.util.List;
 @RestController
 public class ShopcatController extends BaseController {
 
-    @Autowired
-    private RedisOperator redisOperator;
+    private final RedisOperator redisOperator;
+    private final CartService cartService;
 
     @Autowired
-    private CartService cartService;
+    public ShopcatController(RedisOperator redisOperator, CartService cartService){
+        this.redisOperator = redisOperator;
+        this.cartService = cartService;
+    }
 
     @ApiOperation(value = "添加商品到购物车", notes = "添加商品到购物车", httpMethod = "POST")
     @PostMapping("/add")
@@ -63,9 +67,4 @@ public class ShopcatController extends BaseController {
         cartService.removeItemFromCart(userId, itemSpecId);
         return IMOOCJSONResult.ok();
     }
-
-    // TODO 1） 购物车清空功能
-    //      2) 加减号 - 添加、减少商品数量
-    //         +1 -1 -1 = 0  =>  -1 -1 +1 = 1 (问题： 如何保证前端请求顺序执行)
-
 }

@@ -17,6 +17,7 @@ import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,8 @@ public class OrdersController extends BaseController {
 
 //        System.out.println(submitOrderBO.toString());
 
-        String shopcartJson = redisOperator.get(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
+        RBucket<Object> bucket = redisOperator.getRBucket(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
+        String shopcartJson = (String)bucket.get();
         if (StringUtils.isBlank(shopcartJson)) {
             return IMOOCJSONResult.errorMsg("购物数据不正确");
         }

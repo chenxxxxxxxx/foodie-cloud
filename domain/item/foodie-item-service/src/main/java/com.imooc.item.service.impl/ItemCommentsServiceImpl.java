@@ -23,8 +23,12 @@ import java.util.Map;
 @RestController
 public class ItemCommentsServiceImpl extends BaseService implements ItemCommentsService {
 
+    private final ItemsCommentsMapperCustom itemsCommentsMapperCustom;
+
     @Autowired
-    private ItemsCommentsMapperCustom itemsCommentsMapperCustom;
+    public ItemCommentsServiceImpl(ItemsCommentsMapperCustom itemsCommentsMapperCustom){
+        this.itemsCommentsMapperCustom = itemsCommentsMapperCustom;
+    }
 
     @Transactional(propagation = Propagation.SUPPORTS)
     @Override

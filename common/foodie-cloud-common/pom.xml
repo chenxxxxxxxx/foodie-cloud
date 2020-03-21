@@ -26,13 +26,6 @@
         <dependency>
             <groupId>org.springframework.boot</groupId>
             <artifactId>spring-boot-starter-web</artifactId>
-            <!-- 打包war [2] 移除自带内置tomcat -->
-            <!--<exclusions>-->
-            <!--<exclusion>-->
-            <!--<artifactId>spring-boot-starter-tomcat</artifactId>-->
-            <!--<groupId>org.springframework.boot</groupId>-->
-            <!--</exclusion>-->
-            <!--</exclusions>-->
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -70,11 +63,13 @@
             <version>1.2.12</version>
         </dependency>
 
-        <!-- 引入 redis 依赖 -->
+        <!-- https://mvnrepository.com/artifact/org.redisson/redisson-spring-boot-starter -->
         <dependency>
-            <groupId>org.springframework.boot</groupId>
-            <artifactId>spring-boot-starter-data-redis</artifactId>
+            <groupId>org.redisson</groupId>
+            <artifactId>redisson-spring-boot-starter</artifactId>
+            <version>3.12.3</version>
         </dependency>
+
     </dependencies>
 
 

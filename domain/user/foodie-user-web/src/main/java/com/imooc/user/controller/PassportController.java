@@ -13,6 +13,7 @@ import com.imooc.utils.RedisOperator;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import org.apache.commons.lang3.StringUtils;
+import org.redisson.api.RBucket;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -26,16 +27,20 @@ import java.util.List;
 @RequestMapping("passport")
 public class PassportController extends BaseController {
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    private final RedisOperator redisOperator;
 
     @Autowired
-    private RedisOperator redisOperator;
+    public PassportController(UserService userService, RedisOperator redisOperator){
+        this.userService = userService;
+        this.redisOperator = redisOperator;
+    }
+
 
     @ApiOperation(value = "用户名是否存在", notes = "用户名是否存在", httpMethod = "GET")
     @GetMapping("/usernameIsExist")
     public IMOOCJSONResult usernameIsExist(@RequestParam String username) {
-
         // 1. 判断用户名不能为空
         if (StringUtils.isBlank(username)) {
             return IMOOCJSONResult.errorMsg("用户名不能为空");
@@ -154,8 +159,8 @@ public class PassportController extends BaseController {
          */
 
         // 从redis中获取购物车
-        String shopcartJsonRedis = redisOperator.get(FOODIE_SHOPCART + ":" + userId);
-
+        RBucket<Object> rBucket = redisOperator.getRBucket(FOODIE_SHOPCART + ":" + userId);
+        String shopcartJsonRedis = (String) rBucket.get();
         // 从cookie中获取购物车
         String shopcartStrCookie = CookieUtils.getCookieValue(request, FOODIE_SHOPCART, true);
 
