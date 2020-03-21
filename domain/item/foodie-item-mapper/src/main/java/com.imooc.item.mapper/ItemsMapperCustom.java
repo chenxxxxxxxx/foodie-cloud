@@ -1,7 +1,7 @@
-package com.imooc.item.mapper;
+package com.tt.item.mapper;
 
-import com.imooc.item.pojo.vo.ItemCommentVO;
-import com.imooc.item.pojo.vo.ShopcartVO;
+import com.tt.item.pojo.vo.ItemCommentVO;
+import com.tt.item.pojo.vo.ShopcartVO;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

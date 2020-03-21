@@ -25,7 +25,7 @@ turbine:
   #  app-config: foodie-user-service,foodie-item-service,foodie-order-service
   app-config: foodie-order-service,foodie-user-service,foodie-item-service,foodie-cart-service
   # 集群名称叫default
-  # eureka: instance: metadata-map: abcd-> imooc
+  # eureka: instance: metadata-map: abcd-> tt
   # metadata['abcd']
   cluster-name-expression: '"default"'
   # 根据host + port的形式组合来进行区分

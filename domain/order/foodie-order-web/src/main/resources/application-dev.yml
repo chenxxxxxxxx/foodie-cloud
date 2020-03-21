@@ -12,4 +12,4 @@ mybatis:
 
 redisson: # Redisson
   address: redis://192.168.1.105:6379
-  password: imooc
+  password: tt

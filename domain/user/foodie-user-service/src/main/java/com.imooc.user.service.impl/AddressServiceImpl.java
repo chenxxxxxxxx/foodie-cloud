@@ -1,18 +1,16 @@
-package com.imooc.user.service.impl;
+package com.tt.user.service.impl;
 
-import com.imooc.enums.YesOrNo;
-import com.imooc.user.mapper.UserAddressMapper;
-import com.imooc.user.pojo.UserAddress;
-import com.imooc.user.pojo.bo.AddressBO;
-import com.imooc.user.service.AddressService;
+import com.tt.enums.YesOrNo;
+import com.tt.user.mapper.UserAddressMapper;
+import com.tt.user.pojo.UserAddress;
+import com.tt.user.pojo.bo.AddressBO;
+import com.tt.user.service.AddressService;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;
-import tk.mybatis.mapper.entity.Example;
 
 import java.util.Date;
 import java.util.List;

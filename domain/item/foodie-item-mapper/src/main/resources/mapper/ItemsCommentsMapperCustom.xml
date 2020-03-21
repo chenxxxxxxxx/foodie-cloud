@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.imooc.item.mapper.ItemsCommentsMapperCustom" >
+<mapper namespace="com.tt.item.mapper.ItemsCommentsMapperCustom" >
 
   <select id="saveComments" parameterType="Map">
 
@@ -36,7 +36,7 @@
 
   </select>
   
-  <resultMap id="myComments" type="com.imooc.item.pojo.vo.MyCommentVO">
+  <resultMap id="myComments" type="com.tt.item.pojo.vo.MyCommentVO">
     <id column="commentId" property="commentId"/>
     <result column="content" property="content"/>
     <result column="createdTime" property="createdTime"/>

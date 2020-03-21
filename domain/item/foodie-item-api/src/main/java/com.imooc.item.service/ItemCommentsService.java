@@ -1,6 +1,6 @@
-package com.imooc.item.service;
+package com.tt.item.service;
 
-import com.imooc.pojo.PagedGridResult;
+import com.tt.pojo.PagedGridResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

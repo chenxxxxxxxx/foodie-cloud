@@ -1,7 +1,7 @@
-package com.imooc.item.mapper;
+package com.tt.item.mapper;
 
-import com.imooc.item.pojo.Items;
-import com.imooc.my.mapper.MyMapper;
+import com.tt.item.pojo.Items;
+import com.tt.my.mapper.MyMapper;
 
 public interface ItemsMapper extends MyMapper<Items> {
 }

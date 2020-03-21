@@ -12,15 +12,15 @@ spring:
     database: 0
     host: 192.168.1.105
     port: 6379
-    password: imooc
+    password: tt
     # Redis 哨兵模式
 #    database: 1
-#    password: imooc
+#    password: tt
 #    sentinel:
-#      master: imooc-master
+#      master: tt-master
 #      nodes: 192.168.1.191:26379,192.168.1.192:26379,192.168.1.193:26379
     # Redis 集群模式
-#    password: imooc
+#    password: tt
 #    cluster:
 #      nodes: 192.168.1.201:6379,192.168.1.202:6379,192.168.1.203:6379,192.168.1.204:6379,192.168.1.205:6379,192.168.1.206:6379
 

@@ -1,8 +1,8 @@
-package com.imooc.item.mapper;
+package com.tt.item.mapper;
 
-import com.imooc.item.pojo.ItemsComments;
-import com.imooc.item.pojo.vo.MyCommentVO;
-import com.imooc.my.mapper.MyMapper;
+import com.tt.item.pojo.ItemsComments;
+import com.tt.item.pojo.vo.MyCommentVO;
+import com.tt.my.mapper.MyMapper;
 import org.apache.ibatis.annotations.Param;
 
 import java.util.List;

@@ -1,7 +1,7 @@
-package com.imooc.user.service;
+package com.tt.user.service;
 
-import com.imooc.user.pojo.Users;
-import com.imooc.user.pojo.bo.UserBO;
+import com.tt.user.pojo.Users;
+import com.tt.user.pojo.bo.UserBO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.*;
 

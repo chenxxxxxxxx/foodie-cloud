@@ -1,11 +1,11 @@
-package com.imooc.item.service.impl;
+package com.tt.item.service.impl;
 
 import com.github.pagehelper.PageHelper;
-import com.imooc.item.mapper.ItemsCommentsMapperCustom;
-import com.imooc.item.pojo.vo.MyCommentVO;
-import com.imooc.item.service.ItemCommentsService;
-import com.imooc.pojo.PagedGridResult;
-import com.imooc.service.BaseService;
+import com.tt.item.mapper.ItemsCommentsMapperCustom;
+import com.tt.item.pojo.vo.MyCommentVO;
+import com.tt.item.service.ItemCommentsService;
+import com.tt.pojo.PagedGridResult;
+import com.tt.service.BaseService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;

@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8" ?>
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
-<mapper namespace="com.imooc.order.mapper.OrdersMapperCustom" >
+<mapper namespace="com.tt.order.mapper.OrdersMapperCustom" >
 
-  <resultMap id="myOrdersVO" type="com.imooc.order.pojo.vo.MyOrdersVO">
+  <resultMap id="myOrdersVO" type="com.tt.order.pojo.vo.MyOrdersVO">
     <id column="orderId" property="orderId"/>
     <result column="createdTime" property="createdTime"/>
     <result column="payMethod" property="payMethod"/>
@@ -14,7 +14,7 @@
     <collection property="subOrderItemList"
                 select="getSubItems"
                 column="orderId"
-                ofType="com.imooc.order.pojo.vo.MySubOrderItemVO">
+                ofType="com.tt.order.pojo.vo.MySubOrderItemVO">
       <result column="itemId" property="itemId"/>
       <result column="itemName" property="itemName"/>
       <result column="itemImg" property="itemImg"/>
@@ -51,7 +51,7 @@
   </select>
     
     
-    <select id="getSubItems" parameterType="String" resultType="com.imooc.order.pojo.vo.MySubOrderItemVO">
+    <select id="getSubItems" parameterType="String" resultType="com.tt.order.pojo.vo.MySubOrderItemVO">
 
       select
         oi.item_id as itemId,
@@ -121,7 +121,7 @@
     </select>
 
 
-    <select id="getMyOrderTrend" parameterType="Map" resultType="com.imooc.order.pojo.OrderStatus">
+    <select id="getMyOrderTrend" parameterType="Map" resultType="com.tt.order.pojo.OrderStatus">
 
         SELECT
             os.order_id as orderId,

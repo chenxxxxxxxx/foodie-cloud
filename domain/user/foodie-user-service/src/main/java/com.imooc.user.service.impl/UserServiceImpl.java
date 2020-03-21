@@ -1,15 +1,14 @@
-package com.imooc.user.service.impl;
+package com.tt.user.service.impl;
 
-import com.imooc.enums.Sex;
-import com.imooc.user.mapper.UsersMapper;
-import com.imooc.user.pojo.Users;
-import com.imooc.user.pojo.bo.UserBO;
-import com.imooc.user.service.UserService;
-import com.imooc.utils.DateUtil;
-import com.imooc.utils.MD5Utils;
+import com.tt.enums.Sex;
+import com.tt.user.mapper.UsersMapper;
+import com.tt.user.pojo.Users;
+import com.tt.user.pojo.bo.UserBO;
+import com.tt.user.service.UserService;
+import com.tt.utils.DateUtil;
+import com.tt.utils.MD5Utils;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Propagation;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RestController;

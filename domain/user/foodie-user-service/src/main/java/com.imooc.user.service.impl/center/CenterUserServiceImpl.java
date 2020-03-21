@@ -1,9 +1,9 @@
-package com.imooc.user.service.impl.center;
+package com.tt.user.service.impl.center;
 
-import com.imooc.user.mapper.UsersMapper;
-import com.imooc.user.pojo.Users;
-import com.imooc.user.pojo.bo.center.CenterUserBO;
-import com.imooc.user.service.center.CenterUserService;
+import com.tt.user.mapper.UsersMapper;
+import com.tt.user.pojo.Users;
+import com.tt.user.pojo.bo.center.CenterUserBO;
+import com.tt.user.service.center.CenterUserService;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;

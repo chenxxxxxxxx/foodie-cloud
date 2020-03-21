@@ -4,7 +4,7 @@
          xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
     <parent>
         <artifactId>foodie-cloud</artifactId>
-        <groupId>com.imooc</groupId>
+        <groupId>com.tt</groupId>
         <version>1.0-SNAPSHOT</version>
         <relativePath>../../pom.xml</relativePath>
     </parent>
@@ -46,7 +46,7 @@
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
                 <configuration>
-                    <mainClass>com.imooc.HystrixTurbineApplication</mainClass>
+                    <mainClass>com.tt.HystrixTurbineApplication</mainClass>
                 </configuration>
                 <executions>
                     <execution>

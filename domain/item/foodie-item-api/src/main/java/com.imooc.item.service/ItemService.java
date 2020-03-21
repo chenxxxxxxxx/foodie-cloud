@@ -1,9 +1,9 @@
-package com.imooc.item.service;
+package com.tt.item.service;
 
-import com.imooc.item.pojo.*;
-import com.imooc.item.pojo.vo.CommentLevelCountsVO;
-import com.imooc.item.pojo.vo.ShopcartVO;
-import com.imooc.pojo.PagedGridResult;
+import com.tt.item.pojo.*;
+import com.tt.item.pojo.vo.CommentLevelCountsVO;
+import com.tt.item.pojo.vo.ShopcartVO;
+import com.tt.pojo.PagedGridResult;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
