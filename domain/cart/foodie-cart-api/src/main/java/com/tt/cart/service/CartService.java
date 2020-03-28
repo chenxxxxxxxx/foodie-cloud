@@ -1,6 +1,6 @@
 package com.tt.cart.service;
 
-import com.tt.pojo.ShopcartBO;
+import com.tt.pojo.ShopCartBO;
 import org.springframework.cloud.openfeign.FeignClient;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -16,7 +16,7 @@ public interface CartService {
 
     @PostMapping("addItem")
     boolean addItemToCart(@RequestParam("userId") String userId,
-                          @RequestBody ShopcartBO shopcartBO);
+                          @RequestBody ShopCartBO shopcartBO);
 
     @PostMapping("removeItem")
     boolean removeItemFromCart(@RequestParam("userId") String userId,

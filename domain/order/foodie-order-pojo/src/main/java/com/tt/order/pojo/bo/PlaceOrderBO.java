@@ -1,6 +1,6 @@
 package com.tt.order.pojo.bo;
 
-import com.tt.pojo.ShopcartBO;
+import com.tt.pojo.ShopCartBO;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -17,6 +17,6 @@ public class PlaceOrderBO {
 
     private SubmitOrderBO order;
 
-    private List<ShopcartBO> items;
+    private List<ShopCartBO> items;
 
 }

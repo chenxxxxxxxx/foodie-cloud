@@ -1,8 +1,10 @@
 package com.tt.user.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.tt.controller.BaseController;
 import com.tt.pojo.JSONResult;
-import com.tt.pojo.ShopcartBO;
+import com.tt.pojo.ShopCartBO;
 import com.tt.user.pojo.Users;
 import com.tt.user.pojo.bo.UserBO;
 import com.tt.user.service.UserService;
@@ -32,11 +34,12 @@ public class PassportController extends BaseController {
     private final RedisOperator redisOperator;
 
     @Autowired
-    public PassportController(UserService userService, RedisOperator redisOperator){
+    public PassportController(UserService userService, RedisOperator redisOperator) {
         this.userService = userService;
         this.redisOperator = redisOperator;
     }
 
+    private static final String USER_LOGIN_COOKIE_NAME = "user";
 
     @ApiOperation(value = "用户名是否存在", notes = "用户名是否存在", httpMethod = "GET")
     @GetMapping("/usernameIsExist")
@@ -106,38 +109,58 @@ public class PassportController extends BaseController {
 
     @ApiOperation(value = "用户登录", notes = "用户登录", httpMethod = "POST")
     @PostMapping("/login")
+    @HystrixCommand(
+            commandKey = "loginFail",
+            // 全局服务分组，用于组织仪表盘，统计信息。默认：类名
+            groupKey = "loginFailGroup",
+            fallbackMethod = "loginFail",
+            threadPoolProperties = {
+                    // 核心线程数（并发执行的最大线程数，默认10）
+                    @HystrixProperty(name = "coreSize", value = "10"),
+                    //  #BlockingQueue的最大队列数，默认值-1
+                    @HystrixProperty(name = "maxQueueSize", value = "20"),
+                    // 在maxQueueSize=-1的时候无效，即使maxQueueSize没有达到最大值，
+                    // 达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
+                    @HystrixProperty(name = "queueSizeRejectionThreshold", value = "15")
+            })
     public JSONResult login(@RequestBody UserBO userBO,
                             HttpServletRequest request,
                             HttpServletResponse response) throws Exception {
 
         String username = userBO.getUsername();
         String password = userBO.getPassword();
-
-        // 0. 判断用户名和密码必须不为空
-        if (StringUtils.isBlank(username) ||
-                StringUtils.isBlank(password)) {
+        if (StringUtils.isBlank(username) || StringUtils.isBlank(password)) {
             return JSONResult.errorMsg("用户名或密码不能为空");
         }
 
-        // 1. 实现登录
-        Users userResult = userService.queryUserForLogin(username,
-                    MD5Utils.getMD5Str(password));
-
+        Users userResult = userService.queryUserForLogin(username, MD5Utils.getMD5Str(password));
         if (userResult == null) {
             return JSONResult.errorMsg("用户名或密码不正确");
         }
 
         userResult = setNullProperty(userResult);
 
-        CookieUtils.setCookie(request, response, "user",
-                JsonUtils.objectToJson(userResult), true);
-
+        CookieUtils.setCookie(request, response, USER_LOGIN_COOKIE_NAME, JsonUtils.objectToJson(userResult), true);
 
         // TODO 生成用户token，存入redis会话
         // 同步购物车数据
         synchShopcartData(userResult.getId(), request, response);
 
         return JSONResult.ok(userResult);
+    }
+
+    /**
+     * login - 登录接口服务降级方法
+     * @param userBO
+     * @param request
+     * @param response
+     * @return
+     * @throws Exception
+     */
+    public JSONResult loginFail(UserBO userBO,
+                            HttpServletRequest request,
+                            HttpServletResponse response) throws Exception {
+        return JSONResult.errorMsg("网络开小差了~~~~");
     }
 
     /**
@@ -159,15 +182,15 @@ public class PassportController extends BaseController {
          */
 
         // 从redis中获取购物车
-        RBucket<Object> rBucket = redisOperator.getRBucket(FOODIE_SHOPCART + ":" + userId);
+        RBucket<Object> rBucket = redisOperator.getRBucket(FOODIE_SHOP_CART + ":" + userId);
         String shopcartJsonRedis = (String) rBucket.get();
         // 从cookie中获取购物车
-        String shopcartStrCookie = CookieUtils.getCookieValue(request, FOODIE_SHOPCART, true);
+        String shopcartStrCookie = CookieUtils.getCookieValue(request, FOODIE_SHOP_CART, true);
 
         if (StringUtils.isBlank(shopcartJsonRedis)) {
             // redis为空，cookie不为空，直接把cookie中的数据放入redis
             if (StringUtils.isNotBlank(shopcartStrCookie)) {
-                redisOperator.set(FOODIE_SHOPCART + ":" + userId, shopcartStrCookie);
+                redisOperator.set(FOODIE_SHOP_CART + ":" + userId, shopcartStrCookie);
             }
         } else {
             // redis不为空，cookie不为空，合并cookie和redis中购物车的商品数据（同一商品则覆盖redis）
@@ -181,16 +204,16 @@ public class PassportController extends BaseController {
                  * 5. 更新到redis和cookie中
                  */
 
-                List<ShopcartBO> shopcartListRedis = JsonUtils.jsonToList(shopcartJsonRedis, ShopcartBO.class);
-                List<ShopcartBO> shopcartListCookie = JsonUtils.jsonToList(shopcartStrCookie, ShopcartBO.class);
+                List<ShopCartBO> shopcartListRedis = JsonUtils.jsonToList(shopcartJsonRedis, ShopCartBO.class);
+                List<ShopCartBO> shopcartListCookie = JsonUtils.jsonToList(shopcartStrCookie, ShopCartBO.class);
 
                 // 定义一个待删除list
-                List<ShopcartBO> pendingDeleteList = new ArrayList<>();
+                List<ShopCartBO> pendingDeleteList = new ArrayList<>();
 
-                for (ShopcartBO redisShopcart : shopcartListRedis) {
+                for (ShopCartBO redisShopcart : shopcartListRedis) {
                     String redisSpecId = redisShopcart.getSpecId();
 
-                    for (ShopcartBO cookieShopcart : shopcartListCookie) {
+                    for (ShopCartBO cookieShopcart : shopcartListCookie) {
                         String cookieSpecId = cookieShopcart.getSpecId();
 
                         if (redisSpecId.equals(cookieSpecId)) {
@@ -209,11 +232,11 @@ public class PassportController extends BaseController {
                 // 合并两个list
                 shopcartListRedis.addAll(shopcartListCookie);
                 // 更新到redis和cookie
-                CookieUtils.setCookie(request, response, FOODIE_SHOPCART, JsonUtils.objectToJson(shopcartListRedis), true);
-                redisOperator.set(FOODIE_SHOPCART + ":" + userId, JsonUtils.objectToJson(shopcartListRedis));
+                CookieUtils.setCookie(request, response, FOODIE_SHOP_CART, JsonUtils.objectToJson(shopcartListRedis), true);
+                redisOperator.set(FOODIE_SHOP_CART + ":" + userId, JsonUtils.objectToJson(shopcartListRedis));
             } else {
                 // redis不为空，cookie为空，直接把redis覆盖cookie
-                CookieUtils.setCookie(request, response, FOODIE_SHOPCART, shopcartJsonRedis, true);
+                CookieUtils.setCookie(request, response, FOODIE_SHOP_CART, shopcartJsonRedis, true);
             }
 
         }
@@ -241,7 +264,7 @@ public class PassportController extends BaseController {
 
         // TODO 用户退出登录，需要清空购物车
         // 分布式会话中需要清除用户数据
-        CookieUtils.deleteCookie(request, response, FOODIE_SHOPCART);
+        CookieUtils.deleteCookie(request, response, FOODIE_SHOP_CART);
 
         return JSONResult.ok();
     }

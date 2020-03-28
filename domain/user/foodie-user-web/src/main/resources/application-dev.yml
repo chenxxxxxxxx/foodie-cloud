@@ -3,27 +3,53 @@ server:
 
 spring:
   datasource:                                           # 数据源的相关配置
-    # 拆分数据源到独立database instance，或者独立schema
-#    url: jdbc:mysql://localhost:3306/foodie-cloud-item?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true
     url: jdbc:mysql://localhost:3306/foodie-shop?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
     password: 123456
-  redis:
-    # Redis 单机单实例
-    database: 0
-    host: 192.168.1.105
-    port: 6379
-    password: tt
-    # Redis 哨兵模式
-#    database: 1
-#    password: tt
-#    sentinel:
-#      master: tt-master
-#      nodes: 192.168.1.191:26379,192.168.1.192:26379,192.168.1.193:26379
-    # Redis 集群模式
-#    password: tt
-#    cluster:
-#      nodes: 192.168.1.201:6379,192.168.1.202:6379,192.168.1.203:6379,192.168.1.204:6379,192.168.1.205:6379,192.168.1.206:6379
 
 mybatis:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+redisson:
+  address: redis://192.168.1.105:6379
+  password: imooc
+
+## 开启所有actuator-endpoint
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
+
+hystrix:
+  command:
+    default:
+      fallback:
+        enabled: true
+      circuitBreaker:
+        enabled: true
+        # 超过50%错误，那么开启熔断
+        errorThresholdPercentage: 50
+        # 5个request之后才进行统计
+        requestVolumeThreshold: 5
+        # 10秒之后进入半开状态
+        sleepWindowInMilliseconds: 10000
+      #是否开启超时设置
+      execution:
+        timeout:
+          enabled: true
+        # 可以指定隔离方式是线程池还是信号量
+        isolation:
+          thread:
+            # 发生超时是是否中断，默认true
+            interruptOnTimeout: true
+            interruptOnFutureCancel: true
+            timeoutInMilliseconds: 4000
+    loginFail:
+      execution:
+        isolation:
+          thread:
+            timeoutInMilliseconds: 3000

@@ -1,8 +1,8 @@
 package com.tt.user.controller.center;
 
+import com.tt.pojo.JSONResult;
 import com.tt.user.pojo.Users;
 import com.tt.user.service.center.CenterUserService;
-import com.tt.pojo.JSONResult;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
 import io.swagger.annotations.ApiParam;
@@ -18,7 +18,11 @@ import org.springframework.web.bind.annotation.RestController;
 public class CenterController {
 
     @Autowired
-    private CenterUserService centerUserService;
+    public CenterController(CenterUserService centerUserService) {
+        this.centerUserService = centerUserService;
+    }
+
+    private final CenterUserService centerUserService;
 
     @ApiOperation(value = "获取用户信息", notes = "获取用户信息", httpMethod = "GET")
     @GetMapping("userInfo")

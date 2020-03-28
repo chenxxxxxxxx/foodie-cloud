@@ -1,7 +1,13 @@
 package com.tt.order;
 
+import com.tt.item.service.ItemService;
+import com.tt.order.service.fallback.AddressServiceFeignClient;
+import com.tt.order.service.fallback.ItemCommentsServiceFeignClient;
+import com.tt.order.service.fallback.ItemServiceFeignClient;
+import com.tt.user.service.AddressService;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.ComponentScan;
@@ -17,10 +23,13 @@ import tk.mybatis.spring.annotation.MapperScan;
 // 扫描所有包以及相关组件包
 @ComponentScan(basePackages = {"com.tt", "org.n3r.idworker"})
 @EnableDiscoveryClient
-@EnableFeignClients(basePackages = {
-        "com.tt.item.service",
-        "com.tt.user.service"})
+@EnableFeignClients(basePackageClasses = {
+        ItemCommentsServiceFeignClient.class,
+        AddressServiceFeignClient.class,
+        ItemServiceFeignClient.class
+})
 @EnableScheduling
+@EnableCircuitBreaker
 public class OrderApplication {
 
     public static void main(String[] args) {

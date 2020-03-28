@@ -4,7 +4,6 @@ import com.tt.enums.OrderStatusEnum;
 import com.tt.enums.YesOrNo;
 import com.tt.item.pojo.Items;
 import com.tt.item.pojo.ItemsSpec;
-import com.tt.item.service.ItemService;
 import com.tt.order.mapper.OrderItemsMapper;
 import com.tt.order.mapper.OrderStatusMapper;
 import com.tt.order.mapper.OrdersMapper;
@@ -16,9 +15,10 @@ import com.tt.order.pojo.bo.SubmitOrderBO;
 import com.tt.order.pojo.vo.MerchantOrdersVO;
 import com.tt.order.pojo.vo.OrderVO;
 import com.tt.order.service.OrderService;
-import com.tt.pojo.ShopcartBO;
+import com.tt.order.service.fallback.AddressServiceFeignClient;
+import com.tt.order.service.fallback.ItemServiceFeignClient;
+import com.tt.pojo.ShopCartBO;
 import com.tt.user.pojo.UserAddress;
-import com.tt.user.service.AddressService;
 import com.tt.utils.DateUtil;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,16 +33,16 @@ import java.util.List;
 @Service
 public class OrderServiceImpl implements OrderService {
 
-    private final AddressService addressService;
-    private final ItemService itemService;
+    private final AddressServiceFeignClient addressService;
+    private final ItemServiceFeignClient itemService;
     private final OrdersMapper ordersMapper;
     private final OrderItemsMapper orderItemsMapper;
     private final OrderStatusMapper orderStatusMapper;
     private final Sid sid;
 
     @Autowired
-    public OrderServiceImpl(AddressService addressService,
-                            ItemService itemService,
+    public OrderServiceImpl(AddressServiceFeignClient addressService,
+                            ItemServiceFeignClient itemService,
                             OrdersMapper ordersMapper,
                             OrderItemsMapper orderItemsMapper,
                             OrderStatusMapper orderStatusMapper,
@@ -60,7 +60,7 @@ public class OrderServiceImpl implements OrderService {
     @Override
     public OrderVO createOrder(PlaceOrderBO placeOrderBO) {
 
-        List<ShopcartBO> shopcartList = placeOrderBO.getItems();
+        List<ShopCartBO> shopcartList = placeOrderBO.getItems();
         SubmitOrderBO submitOrderBO = placeOrderBO.getOrder();
         String userId = submitOrderBO.getUserId();
         String addressId = submitOrderBO.getAddressId();
@@ -98,9 +98,9 @@ public class OrderServiceImpl implements OrderService {
         String itemSpecIdArr[] = itemSpecIds.split(",");
         Integer totalAmount = 0;    // 商品原价累计
         Integer realPayAmount = 0;  // 优惠后的实际支付价格累计
-        List<ShopcartBO> toBeRemovedShopcatdList = new ArrayList<>();
+        List<ShopCartBO> toBeRemovedShopcatdList = new ArrayList<>();
         for (String itemSpecId : itemSpecIdArr) {
-            ShopcartBO cartItem = getBuyCountsFromShopcart(shopcartList, itemSpecId);
+            ShopCartBO cartItem = getBuyCountsFromShopcart(shopcartList, itemSpecId);
             // 整合redis后，商品购买的数量重新从redis的购物车中获取
             int buyCounts = cartItem.getBuyCounts();
             toBeRemovedShopcatdList.add(cartItem);
@@ -164,8 +164,8 @@ public class OrderServiceImpl implements OrderService {
      * @param specId
      * @return
      */
-    private ShopcartBO getBuyCountsFromShopcart(List<ShopcartBO> shopcartList, String specId) {
-        for (ShopcartBO cart : shopcartList) {
+    private ShopCartBO getBuyCountsFromShopcart(List<ShopCartBO> shopcartList, String specId) {
+        for (ShopCartBO cart : shopcartList) {
             if (cart.getSpecId().equals(specId)) {
                 return cart;
             }

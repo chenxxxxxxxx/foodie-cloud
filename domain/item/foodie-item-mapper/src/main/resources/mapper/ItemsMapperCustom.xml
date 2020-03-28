@@ -99,7 +99,7 @@
     </select>-->
 
 
-    <select id="queryItemsBySpecIds" parameterType="List" resultType="com.tt.item.pojo.vo.ShopcartVO">
+    <select id="queryItemsBySpecIds" parameterType="List" resultType="com.tt.item.pojo.vo.ShopCartVO">
         SELECT
             t_items.id as itemId,
             t_items.item_name as itemName,

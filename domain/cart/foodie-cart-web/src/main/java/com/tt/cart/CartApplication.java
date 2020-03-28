@@ -2,6 +2,7 @@ package com.tt.cart;
 
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
+import org.springframework.cloud.client.circuitbreaker.EnableCircuitBreaker;
 import org.springframework.cloud.client.discovery.EnableDiscoveryClient;
 import org.springframework.context.annotation.ComponentScan;
 import tk.mybatis.spring.annotation.MapperScan;
@@ -13,6 +14,7 @@ import tk.mybatis.spring.annotation.MapperScan;
 @MapperScan(basePackages = "com.tt.cart.mapper")
 @ComponentScan(basePackages = {"com.tt", "org.n3r.idworker"})
 @EnableDiscoveryClient
+@EnableCircuitBreaker
 public class CartApplication {
 
     public static void main(String[] args) {

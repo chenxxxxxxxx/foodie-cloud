@@ -1,13 +1,13 @@
 package com.tt.user.controller.center;
 
 import com.tt.controller.BaseController;
+import com.tt.pojo.JSONResult;
 import com.tt.user.pojo.Users;
 import com.tt.user.pojo.bo.center.CenterUserBO;
 import com.tt.user.resource.FileUpload;
 import com.tt.user.service.center.CenterUserService;
 import com.tt.utils.CookieUtils;
 import com.tt.utils.DateUtil;
-import com.tt.pojo.JSONResult;
 import com.tt.utils.JsonUtils;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -37,10 +37,14 @@ import java.util.Map;
 public class CenterUserController extends BaseController {
 
     @Autowired
-    private CenterUserService centerUserService;
+    public CenterUserController(CenterUserService centerUserService, FileUpload fileUpload) {
+        this.centerUserService = centerUserService;
+        this.fileUpload = fileUpload;
+    }
 
-    @Autowired
-    private FileUpload fileUpload;
+    private final CenterUserService centerUserService;
+
+    private final FileUpload fileUpload;
 
     @ApiOperation(value = "用户头像修改", notes = "用户头像修改", httpMethod = "POST")
     @PostMapping("uploadFace")
@@ -48,7 +52,7 @@ public class CenterUserController extends BaseController {
             @ApiParam(name = "userId", value = "用户id", required = true)
             @RequestParam String userId,
             @ApiParam(name = "file", value = "用户头像", required = true)
-            MultipartFile file,
+                    MultipartFile file,
             HttpServletRequest request, HttpServletResponse response) {
 
         // .sh .php
@@ -76,7 +80,7 @@ public class CenterUserController extends BaseController {
 
                     if (!suffix.equalsIgnoreCase("png") &&
                             !suffix.equalsIgnoreCase("jpg") &&
-                            !suffix.equalsIgnoreCase("jpeg") ) {
+                            !suffix.equalsIgnoreCase("jpeg")) {
                         return JSONResult.errorMsg("图片格式不正确！");
                     }
 
@@ -135,7 +139,6 @@ public class CenterUserController extends BaseController {
 
         return JSONResult.ok();
     }
-
 
 
     @ApiOperation(value = "修改用户信息", notes = "修改用户信息", httpMethod = "POST")

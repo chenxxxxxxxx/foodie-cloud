@@ -1,7 +1,6 @@
 package com.tt.order.service.impl.center;
 
 import com.tt.enums.YesOrNo;
-import com.tt.item.service.ItemCommentsService;
 import com.tt.order.mapper.OrderItemsMapper;
 import com.tt.order.mapper.OrderStatusMapper;
 import com.tt.order.mapper.OrdersMapper;
@@ -10,6 +9,7 @@ import com.tt.order.pojo.OrderStatus;
 import com.tt.order.pojo.Orders;
 import com.tt.order.pojo.bo.center.OrderItemsCommentBO;
 import com.tt.order.service.center.MyCommentsService;
+import com.tt.order.service.fallback.ItemCommentsServiceFeignClient;
 import com.tt.service.BaseService;
 import org.n3r.idworker.Sid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,14 +28,14 @@ public class MyCommentsServiceImpl extends BaseService implements MyCommentsServ
     private final OrderItemsMapper orderItemsMapper;
     private final OrdersMapper ordersMapper;
     private final OrderStatusMapper orderStatusMapper;
-    private final ItemCommentsService itemCommentsService;
+    private final ItemCommentsServiceFeignClient itemCommentsService;
     private final Sid sid;
 
     @Autowired
     public MyCommentsServiceImpl(OrderItemsMapper orderItemsMapper,
                                  OrdersMapper ordersMapper,
                                  OrderStatusMapper orderStatusMapper,
-                                 ItemCommentsService itemCommentsService,
+                                 ItemCommentsServiceFeignClient itemCommentsService,
                                  Sid sid) {
         this.orderItemsMapper = orderItemsMapper;
         this.ordersMapper = ordersMapper;

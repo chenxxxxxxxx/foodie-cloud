@@ -5,7 +5,7 @@ import com.tt.enums.OrderStatusEnum;
 import com.tt.enums.PayMethod;
 import com.tt.order.pojo.OrderStatus;
 import com.tt.order.pojo.bo.PlaceOrderBO;
-import com.tt.pojo.ShopcartBO;
+import com.tt.pojo.ShopCartBO;
 import com.tt.order.pojo.bo.SubmitOrderBO;
 import com.tt.order.pojo.vo.MerchantOrdersVO;
 import com.tt.order.pojo.vo.OrderVO;
@@ -40,13 +40,18 @@ public class OrdersController extends BaseController {
     final static Logger logger = LoggerFactory.getLogger(OrdersController.class);
 
     @Autowired
-    private OrderService orderService;
+    public OrdersController(OrderService orderService, RestTemplate restTemplate, RedisOperator redisOperator){
+        this.orderService = orderService;
+        this.restTemplate = restTemplate;
+        this.redisOperator = redisOperator;
+    }
 
-    @Autowired
-    private RestTemplate restTemplate;
+    private final OrderService orderService;
 
-    @Autowired
-    private RedisOperator redisOperator;
+    private final RestTemplate restTemplate;
+
+    private final RedisOperator redisOperator;
+
 
     @ApiOperation(value = "用户下单", notes = "用户下单", httpMethod = "POST")
     @PostMapping("/create")
@@ -59,16 +64,13 @@ public class OrdersController extends BaseController {
             && submitOrderBO.getPayMethod() != PayMethod.ALIPAY.type ) {
             return JSONResult.errorMsg("支付方式不支持！");
         }
-
-//        System.out.println(submitOrderBO.toString());
-
-        RBucket<Object> bucket = redisOperator.getRBucket(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId());
+        RBucket<Object> bucket = redisOperator.getRBucket(FOODIE_SHOP_CART + ":" + submitOrderBO.getUserId());
         String shopcartJson = (String)bucket.get();
         if (StringUtils.isBlank(shopcartJson)) {
             return JSONResult.errorMsg("购物数据不正确");
         }
 
-        List<ShopcartBO> shopcartList = JsonUtils.jsonToList(shopcartJson, ShopcartBO.class);
+        List<ShopCartBO> shopcartList = JsonUtils.jsonToList(shopcartJson, ShopCartBO.class);
 
         // 1. 创建订单
         PlaceOrderBO orderBO = new PlaceOrderBO(submitOrderBO, shopcartList);
@@ -84,9 +86,9 @@ public class OrdersController extends BaseController {
          */
         // 清理覆盖现有的redis汇总的购物数据
         shopcartList.removeAll(orderVO.getToBeRemovedShopcatdList());
-        redisOperator.set(FOODIE_SHOPCART + ":" + submitOrderBO.getUserId(), JsonUtils.objectToJson(shopcartList));
+        redisOperator.set(FOODIE_SHOP_CART + ":" + submitOrderBO.getUserId(), JsonUtils.objectToJson(shopcartList));
         // 整合redis之后，完善购物车中的已结算商品清除，并且同步到前端的cookie
-        CookieUtils.setCookie(request, response, FOODIE_SHOPCART, JsonUtils.objectToJson(shopcartList), true);
+        CookieUtils.setCookie(request, response, FOODIE_SHOP_CART, JsonUtils.objectToJson(shopcartList), true);
 
         // 3. 向支付中心发送当前订单，用于保存支付中心的订单数据
         MerchantOrdersVO merchantOrdersVO = orderVO.getMerchantOrdersVO();

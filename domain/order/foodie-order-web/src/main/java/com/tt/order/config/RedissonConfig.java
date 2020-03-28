@@ -1,6 +1,6 @@
 package com.tt.order.config;
 
-import com.tt.order.config.properties.RedissonProperties;
+import com.tt.order.config.properties.CustomRedisProperties;
 import org.apache.commons.lang3.StringUtils;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
@@ -15,14 +15,21 @@ import org.springframework.context.annotation.Configuration;
 
 /**
  * Create By Lv.QingYu in 2020/3/21
+ *
  */
 @Configuration
 @ConditionalOnClass(Config.class)
-@EnableConfigurationProperties(RedissonProperties.class)
+@EnableConfigurationProperties(CustomRedisProperties.class)
 public class RedissonConfig {
 
+    private final CustomRedisProperties customRedisProperties;
+
     @Autowired
-    private RedissonProperties redssionProperties;
+    public RedissonConfig(CustomRedisProperties customRedisProperties){
+        this.customRedisProperties = customRedisProperties;
+    }
+
+
 
     /**
      * 单机模式自动装配
@@ -33,13 +40,13 @@ public class RedissonConfig {
     public RedissonClient redissonClient() {
         Config config = new Config();
         SingleServerConfig serverConfig = config.useSingleServer()
-                .setAddress(redssionProperties.getAddress())
-                .setTimeout(redssionProperties.getTimeout())
-                .setConnectionPoolSize(redssionProperties.getConnectionPoolSize())
-                .setConnectionMinimumIdleSize(redssionProperties.getConnectionMinimumIdleSize());
+                .setAddress(customRedisProperties.getAddress())
+                .setTimeout(customRedisProperties.getTimeout())
+                .setConnectionPoolSize(customRedisProperties.getConnectionPoolSize())
+                .setConnectionMinimumIdleSize(customRedisProperties.getConnectionMinimumIdleSize());
 
-        if(StringUtils.isNotBlank(redssionProperties.getPassword())) {
-            serverConfig.setPassword(redssionProperties.getPassword());
+        if(StringUtils.isNotBlank(customRedisProperties.getPassword())) {
+            serverConfig.setPassword(customRedisProperties.getPassword());
         }
         return Redisson.create(config);
     }

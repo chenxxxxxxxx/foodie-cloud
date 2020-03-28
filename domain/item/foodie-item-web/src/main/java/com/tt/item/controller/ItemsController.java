@@ -1,8 +1,15 @@
 package com.tt.item.controller;
 
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixCommand;
+import com.netflix.hystrix.contrib.javanica.annotation.HystrixProperty;
 import com.tt.controller.BaseController;
-import com.tt.item.pojo.*;
-import com.tt.item.pojo.vo.*;
+import com.tt.item.pojo.Items;
+import com.tt.item.pojo.ItemsImg;
+import com.tt.item.pojo.ItemsParam;
+import com.tt.item.pojo.ItemsSpec;
+import com.tt.item.pojo.vo.CommentLevelCountsVO;
+import com.tt.item.pojo.vo.ItemInfoVO;
+import com.tt.item.pojo.vo.ShopCartVO;
 import com.tt.item.service.ItemService;
 import com.tt.pojo.JSONResult;
 import com.tt.pojo.PagedGridResult;
@@ -20,11 +27,29 @@ import java.util.List;
 @RequestMapping("items")
 public class ItemsController extends BaseController {
 
+    private final ItemService itemService;
+
     @Autowired
-    private ItemService itemService;
+    public ItemsController(ItemService itemService){
+        this.itemService = itemService;
+    }
 
     @ApiOperation(value = "查询商品详情", notes = "查询商品详情", httpMethod = "GET")
     @GetMapping("/info/{itemId}")
+    @HystrixCommand(
+            commandKey = "itemInfoFail",
+            // 全局服务分组，用于组织仪表盘，统计信息。默认：类名
+            groupKey = "itemInfoFailGroup",
+            fallbackMethod = "itemInfoFail",
+            threadPoolProperties = {
+                    // 核心线程数（并发执行的最大线程数，默认10）
+                    @HystrixProperty(name = "coreSize", value = "10"),
+                    //  #BlockingQueue的最大队列数，默认值-1
+                    @HystrixProperty(name = "maxQueueSize", value = "20"),
+                    // 在maxQueueSize=-1的时候无效，即使maxQueueSize没有达到最大值，
+                    // 达到queueSizeRejectionThreshold该值后，请求也会被拒绝，默认值5
+                    @HystrixProperty(name = "queueSizeRejectionThreshold", value = "15")
+            })
     public JSONResult info(
             @ApiParam(name = "itemId", value = "商品id", required = true)
             @PathVariable String itemId) {
@@ -45,6 +70,15 @@ public class ItemsController extends BaseController {
         itemInfoVO.setItemParams(itemsParam);
 
         return JSONResult.ok(itemInfoVO);
+    }
+
+    /**
+     * 查询商品详情 - 降级
+     * @param itemId
+     * @return
+     */
+    public JSONResult itemInfoFail(String itemId){
+        return JSONResult.errorMsg("网络开小差了，稍后再试吧~~~");
     }
 
     @ApiOperation(value = "查询商品评价等级", notes = "查询商品评价等级", httpMethod = "GET")
@@ -105,7 +139,7 @@ public class ItemsController extends BaseController {
             return JSONResult.ok();
         }
 
-        List<ShopcartVO> list = itemService.queryItemsBySpecIds(itemSpecIds);
+        List<ShopCartVO> list = itemService.queryItemsBySpecIds(itemSpecIds);
 
         return JSONResult.ok(list);
     }
