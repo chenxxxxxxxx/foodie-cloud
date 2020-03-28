@@ -2,9 +2,9 @@ server:
   port: 10002
 
 spring:
-  datasource:                                           # 数据源的相关配置
-    url: jdbc:mysql://localhost:3306/foodie-shop?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
-    password: 123456
+  datasource:
+    url: ${mariadb.url}
+    password: ${mariadb.password}
 
 mybatis:
   configuration:
@@ -14,15 +14,15 @@ redisson:
   address: redis://192.168.1.105:6379
   password: imooc
 
-## 开启所有actuator-endpoint
-management:
-  endpoint:
-    health:
-      show-details: always
-  endpoints:
-    web:
-      exposure:
-        include: '*'
+## 开启所有actuator-endpoint - 配置中心
+#management:
+#  endpoint:
+#    health:
+#      show-details: always
+#  endpoints:
+#    web:
+#      exposure:
+#        include: '*'
 
 hystrix:
   command:

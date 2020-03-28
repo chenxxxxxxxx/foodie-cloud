@@ -1,0 +1,23 @@
+server:
+  port: 20003
+
+spring:
+  application:
+    name: config-server
+  cloud:
+    config:
+      server:
+        git:
+          uri: https://github.com/lvqingyu201028/foodie-config.git
+          force-pull: true
+          search-paths: '{application}'
+
+## 开启所有actuator-endpoint
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'

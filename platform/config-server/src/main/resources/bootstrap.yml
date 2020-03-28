@@ -1,0 +1,7 @@
+encrypt:
+  key: superNewBee
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:20000/eureka/
