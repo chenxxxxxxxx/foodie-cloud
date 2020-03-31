@@ -1,0 +1,33 @@
+spring:
+  application:
+    name: foodie-gateway
+  redis:
+    host: 192.168.1.105
+    port: 6379
+    password: imooc
+  cloud:
+    gateway:
+      discovery:
+        locator:
+          enabled: false
+          lower-case-service-id: true
+  main:
+    allow-bean-definition-overriding: true
+
+server:
+  port: 20004
+
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:20000/eureka/
+
+## 开启所有actuator-endpoint
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'

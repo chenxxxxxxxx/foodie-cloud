@@ -33,6 +33,11 @@
         <module>platform/hystrix-turbine</module>
         <module>platform/hystrix-dashboard</module>
         <module>platform/config-server</module>
+        <module>platform/gateway</module>
+        <module>domain/auth/auth-service-api</module>
+        <module>domain/auth/auth-service-pojo</module>
+        <module>domain/auth/auth-service-service</module>
+        <module>domain/auth/auth-service-web</module>
     </modules>
 
     <packaging>pom</packaging>
