@@ -1,6 +1,8 @@
 package com.tt.filter;
 
+import com.tt.auth.service.AuthService;
 import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
 import org.springframework.core.Ordered;
@@ -21,6 +23,8 @@ public class CustomAuthFilter implements GatewayFilter, Ordered {
     private static final String AUTH = "Authorization";
     private static final String USERNAME = "user-name";
 
+    @Autowired
+    private AuthService authService;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -33,7 +37,7 @@ public class CustomAuthFilter implements GatewayFilter, Ordered {
             response.setStatusCode(HttpStatus.BAD_GATEWAY);
             return response.setComplete();
         }
-
+        boolean verify = authService.verify(token, username);
         ServerHttpRequest.Builder mutate = request.mutate();
         mutate.header(USERNAME, username);
         mutate.header(AUTH, token);

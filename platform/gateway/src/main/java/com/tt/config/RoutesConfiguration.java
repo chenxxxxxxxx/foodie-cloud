@@ -27,19 +27,16 @@ public class RoutesConfiguration {
     @Qualifier("rateLimiterOrder")
     private final RedisRateLimiter rateLimiterOrder;
 
-    private final CustomAuthFilter customAuthFilter;
-
     @Autowired
-    public RoutesConfiguration(KeyResolver ipAndPortResolver, RedisRateLimiter rateLimiterUser, RedisRateLimiter rateLimiterOrder, CustomAuthFilter customAuthFilter){
+    public RoutesConfiguration(KeyResolver ipAndPortResolver, RedisRateLimiter rateLimiterUser, RedisRateLimiter rateLimiterOrder){
         this.ipAndPortResolver = ipAndPortResolver;
         this.rateLimiterUser = rateLimiterUser;
         this.rateLimiterOrder = rateLimiterOrder;
-        this.customAuthFilter = customAuthFilter;
     }
 
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder locatorBuilder) {
+    public RouteLocator customRouteLocator(RouteLocatorBuilder locatorBuilder, CustomAuthFilter customAuthFilter) {
         return locatorBuilder
                 .routes()
                 .route(r -> r.path("/address/**", "/passport/**", "/center/**", "/userInfo/**")
