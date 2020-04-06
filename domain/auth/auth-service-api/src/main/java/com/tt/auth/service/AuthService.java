@@ -31,5 +31,8 @@ public interface AuthService {
     @GetMapping("refresh")
     UserAccount refresh(@RequestParam("refreshToken") String refreshToken);
 
+    @GetMapping("verifyUserName")
+    boolean verifyUserName(@RequestParam("userName") String userName);
+
 
 }

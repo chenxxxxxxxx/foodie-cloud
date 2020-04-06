@@ -5,6 +5,14 @@ spring:
   datasource:
     url: ${mariadb.url}
     password: ${mariadb.password}
+  zipkin:
+    discovery-client-enabled: true
+    base-url: http://ZIPKIN-SERVER/
+    sender:
+      type: web
+  sleuth:
+    sampler:
+      probability: 1
 
 mybatis:
   configuration:

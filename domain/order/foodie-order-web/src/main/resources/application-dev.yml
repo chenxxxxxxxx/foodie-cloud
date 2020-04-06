@@ -2,9 +2,60 @@ server:
   port: 10003
 
 spring:
-  datasource: # 数据源的相关配置
-    url: jdbc:mysql://localhost:3306/foodie-shop?useUnicode=true&characterEncoding=UTF-8&autoReconnect=true&serverTimezone=UTC
-    password: 123456
+  shardingsphere:
+    # 读写分离（Sharding - 只支持一主多从）
+    datasource:
+      names: master0,slave0
+      master0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/foodie-order?useUnicode=true&autoReconnect=true&serverTimezone=UTC
+        username: root
+        password: 123456
+      slave0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/foodie-order-slave?useUnicode=true&autoReconnect=true&serverTimezone=UTC
+        username: root
+        password: 123456
+    props:
+      sql:
+        show: true
+    sharding:
+      master-slave-rules:
+        ds0:
+          master-data-source-name: master0
+          slave-data-source-names: slave0
+
+    # 数据库分片
+      tables:
+        orders:
+          actual-data-nodes: ds0.orders_$->{1..2}
+          #数据源分片，此处只有一个master库，所以不需要分片
+#      default-database-strategy:
+#        inline.sharding-column: user_id
+#        inline.algorithm-expression: ds$->{user_id % 2}
+          # 表分片
+          table-strategy:
+            standard:
+              sharding-column: id
+#              algorithm-expression: orders_$->{id % 2}
+              precise-algorithm-class-name: com.tt.order.algorithm.TableShardingAlgorithm
+        order_status:
+          actual-data-nodes: ds0.order_status_$->{1..2}
+          # 表分片
+          table-strategy:
+            standard:
+              sharding-column: order_id
+#              algorithm-expression: order_status_$->{order_id % 2}
+              precise-algorithm-class-name: com.tt.order.algorithm.OrderStatusTableShardingAlgorithm
+        order_items:
+          actual-data-nodes: ds0.order_items_$->{1..2}
+          # 表分片
+          table-strategy:
+            inline:
+              sharding-column: order_id
+              algorithm-expression: order_items_$->{order_id % 2}
 
 mybatis:
   configuration:

@@ -1,10 +1,11 @@
 package com.tt.filter;
 
-import com.tt.auth.service.AuthService;
+import com.tt.client.AuthServiceFeignClient;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cloud.gateway.filter.GatewayFilter;
 import org.springframework.cloud.gateway.filter.GatewayFilterChain;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.core.Ordered;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -17,14 +18,20 @@ import reactor.core.publisher.Mono;
 /**
  * Create By Lv.QingYu in 2020/3/31
  */
-@Component("customAuthFilter")
-public class CustomAuthFilter implements GatewayFilter, Ordered {
+@Component("tokenAuthFilter")
+public class TokenAuthFilter implements GatewayFilter, Ordered {
 
     private static final String AUTH = "Authorization";
     private static final String USERNAME = "user-name";
 
     @Autowired
-    private AuthService authService;
+    @Lazy
+    public TokenAuthFilter(AuthServiceFeignClient authServiceFeignClient){
+        this.authServiceFeignClient = authServiceFeignClient;
+    }
+
+
+    private final AuthServiceFeignClient authServiceFeignClient;
 
     @Override
     public Mono<Void> filter(ServerWebExchange exchange, GatewayFilterChain chain) {
@@ -37,7 +44,12 @@ public class CustomAuthFilter implements GatewayFilter, Ordered {
             response.setStatusCode(HttpStatus.BAD_GATEWAY);
             return response.setComplete();
         }
-        boolean verify = authService.verify(token, username);
+        boolean verify = authServiceFeignClient.verify(token, username);
+        if(!verify){
+            response.setStatusCode(HttpStatus.BAD_GATEWAY);
+            return response.setComplete();
+        }
+
         ServerHttpRequest.Builder mutate = request.mutate();
         mutate.header(USERNAME, username);
         mutate.header(AUTH, token);

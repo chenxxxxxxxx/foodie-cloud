@@ -1,6 +1,7 @@
 package com.tt.config;
 
-import com.tt.filter.CustomAuthFilter;
+import com.tt.filter.TokenAuthFilter;
+import com.tt.filter.UserNameAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
@@ -27,39 +28,52 @@ public class RoutesConfiguration {
     @Qualifier("rateLimiterOrder")
     private final RedisRateLimiter rateLimiterOrder;
 
+    private final TokenAuthFilter tokenAuthFilter;
+
+    private final UserNameAuthFilter userNameAuthFilter;
+
     @Autowired
-    public RoutesConfiguration(KeyResolver ipAndPortResolver, RedisRateLimiter rateLimiterUser, RedisRateLimiter rateLimiterOrder){
+    public RoutesConfiguration(KeyResolver ipAndPortResolver,
+                               RedisRateLimiter rateLimiterUser,
+                               RedisRateLimiter rateLimiterOrder,
+                               TokenAuthFilter tokenAuthFilter,
+                               UserNameAuthFilter userNameAuthFilter){
         this.ipAndPortResolver = ipAndPortResolver;
         this.rateLimiterUser = rateLimiterUser;
         this.rateLimiterOrder = rateLimiterOrder;
+        this.tokenAuthFilter = tokenAuthFilter;
+        this.userNameAuthFilter = userNameAuthFilter;
     }
 
 
     @Bean
-    public RouteLocator customRouteLocator(RouteLocatorBuilder locatorBuilder, CustomAuthFilter customAuthFilter) {
+    public RouteLocator customRouteLocator(RouteLocatorBuilder locatorBuilder) {
         return locatorBuilder
                 .routes()
-                .route(r -> r.path("/address/**", "/passport/**", "/center/**", "/userInfo/**")
+                .route(r -> r.path("/address/**")
                         .filters(f -> f.requestRateLimiter(config -> {
                             config.setKeyResolver(ipAndPortResolver);
                             config.setRateLimiter(rateLimiterUser);
                             config.setStatusCode(HttpStatus.BAD_GATEWAY);
-                        }).filter(customAuthFilter))
-                        .uri("lb://FOODIE-USER-SERVICE")
+                        }).filter(userNameAuthFilter)).uri("lb://FOODIE-USER-SERVICE"))
+
+                .route(r -> r.path( "/passport/**", "/center/**", "/userInfo/**")
+                        .filters(f -> f.requestRateLimiter(config -> {
+                            config.setKeyResolver(ipAndPortResolver);
+                            config.setRateLimiter(rateLimiterUser);
+                            config.setStatusCode(HttpStatus.BAD_GATEWAY);
+                        })).uri("lb://FOODIE-USER-SERVICE")
                 )
                 .route(r -> r.path("/orders/**", "/mycomments/**", "/myorders/**")
                         .filters(f -> f.requestRateLimiter(config -> {
                             config.setKeyResolver(ipAndPortResolver);
                             config.setRateLimiter(rateLimiterOrder);
                             config.setStatusCode(HttpStatus.BAD_GATEWAY);
-                        }))
-                        .uri("lb://FOODIE-ORDER-SERVICE")
+                        })).uri("lb://FOODIE-ORDER-SERVICE")
                 )
-                .route(r -> r.path("/items/**")
-                        .uri("lb://FOODIE-ITEM-SERVICE")
+                .route(r -> r.path("/items/**").uri("lb://FOODIE-ITEM-SERVICE")
                 )
-                .route(r -> r.path("/shopCart/**")
-                        .uri("lb://FOODIE-CART-SERVICE"))
+                .route(r -> r.path("/shopCart/**").uri("lb://FOODIE-CART-SERVICE"))
                 .build();
     }
 }

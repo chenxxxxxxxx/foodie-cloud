@@ -102,4 +102,9 @@ public class AuthServiceImpl implements AuthService {
         return userAccountNew;
     }
 
+    @Override
+    public boolean verifyUserName(String userName) {
+        return userService.queryUsernameIsExist(userName);
+    }
+
 }

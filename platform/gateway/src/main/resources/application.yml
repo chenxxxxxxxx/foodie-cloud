@@ -9,10 +9,16 @@ spring:
     gateway:
       discovery:
         locator:
-          enabled: false
-          lower-case-service-id: true
+          enabled: true
+#          lower-case-service-id: false
   main:
     allow-bean-definition-overriding: true
+  zipkin:
+    discovery-client-enabled: true
+    base-url: http://ZIPKIN-SERVER/
+  sleuth:
+    sampler:
+      probability: 1
 
 server:
   port: 20004
