@@ -48,15 +48,7 @@ public class UserServiceImpl implements UserService {
     @Transactional(propagation = Propagation.REQUIRED)
     @Override
     public Users createUser(UserBO userBO) {
-
-//        try {
-//            Thread.sleep(3500);
-//        } catch (InterruptedException e) {
-//            e.printStackTrace();
-//        }
-
         String userId = sid.nextShort();
-
         Users user = new Users();
         user.setId(userId);
         user.setUsername(userBO.getUsername());
@@ -73,12 +65,9 @@ public class UserServiceImpl implements UserService {
         user.setBirthday(DateUtil.stringToDate("1900-01-01"));
         // 默认性别为 保密
         user.setSex(Sex.secret.type);
-
         user.setCreatedTime(new Date());
         user.setUpdatedTime(new Date());
-
         usersMapper.insert(user);
-
         return user;
     }
 
@@ -102,4 +91,14 @@ public class UserServiceImpl implements UserService {
 
         return result;
     }
+
+    @Override
+    public boolean queryUserIdIsExist(String userId) {
+        Example userExample = new Example(Users.class);
+        Example.Criteria userCriteria = userExample.createCriteria();
+        userCriteria.andEqualTo("id", userId);
+        Users result = usersMapper.selectOneByExample(userExample);
+        return result == null ? false : true;
+    }
+
 }

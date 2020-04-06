@@ -27,4 +27,7 @@ public interface UserService {
     @GetMapping("verify")
     Users queryUserForLogin(@RequestParam("username") String username,
                             @RequestParam("password") String password);
+
+    @GetMapping("userId/exists")
+    boolean queryUserIdIsExist(@RequestParam("userId") String userId);
 }

@@ -1,7 +1,6 @@
 package com.tt.config;
 
 import com.tt.filter.TokenAuthFilter;
-import com.tt.filter.UserNameAuthFilter;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.cloud.gateway.filter.ratelimit.KeyResolver;
@@ -30,39 +29,47 @@ public class RoutesConfiguration {
 
     private final TokenAuthFilter tokenAuthFilter;
 
-    private final UserNameAuthFilter userNameAuthFilter;
 
     @Autowired
     public RoutesConfiguration(KeyResolver ipAndPortResolver,
                                RedisRateLimiter rateLimiterUser,
                                RedisRateLimiter rateLimiterOrder,
-                               TokenAuthFilter tokenAuthFilter,
-                               UserNameAuthFilter userNameAuthFilter){
+                               TokenAuthFilter tokenAuthFilter) {
         this.ipAndPortResolver = ipAndPortResolver;
         this.rateLimiterUser = rateLimiterUser;
         this.rateLimiterOrder = rateLimiterOrder;
         this.tokenAuthFilter = tokenAuthFilter;
-        this.userNameAuthFilter = userNameAuthFilter;
     }
 
+    private static final String FOODIE_USER_SERVICE = "lb://FOODIE-USER-SERVICE";
+
+    /**
+     * 用户微服务需要TOKEN校验的URI
+     */
+    private static final String[] TOKEN_USER_SERVICE_PATH = new String[]{"/address/**", "/userCenter/**", "/center/**", "/userInfo/**"};
+
+    /**
+     * 用户微服务不需要TOKEN校验的URI
+     */
+    private static final String[] UN_TOKEN_USER_SERVICE_PATH = new String[]{"/passport/**"};
 
     @Bean
     public RouteLocator customRouteLocator(RouteLocatorBuilder locatorBuilder) {
         return locatorBuilder
                 .routes()
-                .route(r -> r.path("/address/**")
+                .route(r -> r.path(TOKEN_USER_SERVICE_PATH)
                         .filters(f -> f.requestRateLimiter(config -> {
                             config.setKeyResolver(ipAndPortResolver);
                             config.setRateLimiter(rateLimiterUser);
                             config.setStatusCode(HttpStatus.BAD_GATEWAY);
-                        }).filter(userNameAuthFilter)).uri("lb://FOODIE-USER-SERVICE"))
+                        }).filter(tokenAuthFilter)).uri(FOODIE_USER_SERVICE))
 
-                .route(r -> r.path( "/passport/**", "/center/**", "/userInfo/**")
+                .route(r -> r.path(UN_TOKEN_USER_SERVICE_PATH)
                         .filters(f -> f.requestRateLimiter(config -> {
                             config.setKeyResolver(ipAndPortResolver);
                             config.setRateLimiter(rateLimiterUser);
                             config.setStatusCode(HttpStatus.BAD_GATEWAY);
-                        })).uri("lb://FOODIE-USER-SERVICE")
+                        })).uri(FOODIE_USER_SERVICE)
                 )
                 .route(r -> r.path("/orders/**", "/mycomments/**", "/myorders/**")
                         .filters(f -> f.requestRateLimiter(config -> {

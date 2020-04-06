@@ -22,7 +22,8 @@ import reactor.core.publisher.Mono;
 public class TokenAuthFilter implements GatewayFilter, Ordered {
 
     private static final String AUTH = "Authorization";
-    private static final String USERNAME = "user-name";
+
+    private static final String AUTH_ID = "Authorization_id";
 
     @Autowired
     @Lazy
@@ -39,23 +40,23 @@ public class TokenAuthFilter implements GatewayFilter, Ordered {
         ServerHttpResponse response = exchange.getResponse();
         HttpHeaders headers = request.getHeaders();
         String token = headers.getFirst(AUTH);
-        String username = headers.getFirst(USERNAME);
-        if(StringUtils.isBlank(token) || StringUtils.isBlank(username)){
+        String userId = headers.getFirst(AUTH_ID);
+        if(StringUtils.isBlank(token) || StringUtils.isBlank(userId)){
             response.setStatusCode(HttpStatus.BAD_GATEWAY);
             return response.setComplete();
         }
-        boolean verify = authServiceFeignClient.verify(token, username);
+        boolean verify = authServiceFeignClient.verify(token, userId);
         if(!verify){
             response.setStatusCode(HttpStatus.BAD_GATEWAY);
             return response.setComplete();
         }
 
         ServerHttpRequest.Builder mutate = request.mutate();
-        mutate.header(USERNAME, username);
+        mutate.header(AUTH_ID, userId);
         mutate.header(AUTH, token);
         ServerHttpRequest serverHttpRequest = mutate.build();
 
-        response.getHeaders().add(USERNAME, username);
+        response.getHeaders().add(AUTH_ID, userId);
         response.getHeaders().add(AUTH, token);
         return chain.filter(exchange.mutate()
                 .request(serverHttpRequest)
@@ -65,6 +66,6 @@ public class TokenAuthFilter implements GatewayFilter, Ordered {
 
     @Override
     public int getOrder() {
-        return HIGHEST_PRECEDENCE-1;
+        return HIGHEST_PRECEDENCE;
     }
 }
