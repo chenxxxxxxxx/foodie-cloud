@@ -1,16 +1,5 @@
-############################################################
-# Eureka注册中心
-############################################################
-eureka:
-  client:
-    serviceUrl:
-      defaultZone: http://localhost:20000/eureka/
-
 spring:
   cloud:
-    config:
+    nacos:
       discovery:
-        enabled: true
-        service-id: config-server
-      profile: dev
-      label: master
+        server-addr: localhost:8848

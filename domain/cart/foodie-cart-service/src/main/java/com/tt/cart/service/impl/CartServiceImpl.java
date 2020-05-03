@@ -38,7 +38,7 @@ public class CartServiceImpl implements CartService {
         // 需要判断当前购物车中包含已经存在的商品，如果存在则累加购买数量
         String foodieShopCarKey = FOODIE_SHOP_CART + ":" + userId;
         RBucket<Object> bucket = redisOperator.getRBucket(foodieShopCarKey);
-        String shopCartJson =(String) bucket.get();
+        String shopCartJson = (String) bucket.get();
         List<ShopCartBO> shopCartList = null;
         if (StringUtils.isNotBlank(shopCartJson)) {
             // redis中已经有购物车了
@@ -102,4 +102,52 @@ public class CartServiceImpl implements CartService {
         redisOperator.del(foodieShopCarKey);
         return true;
     }
+
+    /**
+     * 注册登录成功后，同步cookie和redis中的购物车数据
+     */
+    @Autowired
+    public String synShopCartData(@RequestParam("userId") String userId,
+                                  @RequestParam(value = "shopCartStrCookie", required = false) String shopCartStrCookie) {
+
+        // 从redis中获取购物车
+        String shopCartKey = FOODIE_SHOP_CART + ":" + userId;
+        RBucket<Object> rBucket = redisOperator.getRBucket(shopCartKey);
+        String shopCartJsonRedis = (String) rBucket.get();
+
+        if (StringUtils.isBlank(shopCartJsonRedis)) {
+            if (StringUtils.isNotBlank(shopCartStrCookie)) {
+                redisOperator.set(shopCartKey, shopCartStrCookie);
+            }
+        } else {
+            if (StringUtils.isNotBlank(shopCartStrCookie)) {
+                List<ShopCartBO> shopCartListRedis = JsonUtils.jsonToList(shopCartJsonRedis, ShopCartBO.class);
+                List<ShopCartBO> shopCartListCookie = JsonUtils.jsonToList(shopCartStrCookie, ShopCartBO.class);
+                List<ShopCartBO> pendingDeleteList = new ArrayList<>();
+                for (ShopCartBO redisShopCart : shopCartListRedis) {
+                    String redisSpecId = redisShopCart.getSpecId();
+                    for (ShopCartBO cookieShopCart : shopCartListCookie) {
+                        String cookieSpecId = cookieShopCart.getSpecId();
+                        if (redisSpecId.equals(cookieSpecId)) {
+                            // 覆盖购买数量，不累加，参考京东
+                            redisShopCart.setBuyCounts(cookieShopCart.getBuyCounts());
+                            // 把cookieShopCart放入待删除列表，用于最后的删除与合并
+                            pendingDeleteList.add(cookieShopCart);
+                        }
+
+                    }
+                }
+                // 从现有cookie中删除对应的覆盖过的商品数据
+                shopCartListCookie.removeAll(pendingDeleteList);
+                // 合并两个list
+                shopCartListRedis.addAll(shopCartListCookie);
+                // 更新到redis和cookie
+                String shopCartListRedisStr = JsonUtils.objectToJson(shopCartListRedis);
+                redisOperator.set(shopCartKey, shopCartListRedisStr);
+                return shopCartListRedisStr;
+            }
+        }
+        return shopCartJsonRedis;
+    }
+
 }

@@ -81,6 +81,9 @@ public class RoutesConfiguration {
                 .route(r -> r.path("/items/**").uri("lb://FOODIE-ITEM-SERVICE")
                 )
                 .route(r -> r.path("/shopCart/**").uri("lb://FOODIE-CART-SERVICE"))
+                // 阿里 Sentinel 流控测试
+                .route(r -> r.path("/product/**").uri("https://www.aliyun.com/").id("aliyun_route"))
+                .route(r -> r.path("/httpbin/**").uri("https://httpbin.org").id("httpbin_route"))
                 .build();
     }
 }

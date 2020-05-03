@@ -25,4 +25,8 @@ public interface CartService {
     @PostMapping("clearCart")
     boolean clearCart(@RequestParam("userId") String userId);
 
+    @PostMapping("synShopCartData")
+    String synShopCartData(@RequestParam("userId") String userId,
+                           @RequestParam(value = "shopCartStrCookie", required = false) String shopCartStrCookie);
+
 }

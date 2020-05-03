@@ -2,9 +2,30 @@ server:
   port: 10002
 
 spring:
-  datasource:
-    url: ${mariadb.url}
-    password: ${mariadb.password}
+  shardingsphere:
+    datasource:
+      names: master,slave0
+      master:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/foodie-user?useUnicode=true&autoReconnect=true&serverTimezone=UTC
+        username: root
+        password: 123456
+      slave0:
+        type: com.zaxxer.hikari.HikariDataSource
+        driver-class-name: com.mysql.jdbc.Driver
+        jdbc-url: jdbc:mysql://localhost:3306/foodie-user-slave?useUnicode=true&autoReconnect=true&serverTimezone=UTC
+        username: root
+        password: 123456
+    sharding:
+      master-slave-rules:
+        ms:
+          master-data-source-name: master
+          slave-data-source-names: slave0
+    props:
+      sql:
+        show: true
+
   zipkin:
     discovery-client-enabled: true
     base-url: http://ZIPKIN-SERVER/
@@ -23,14 +44,14 @@ redisson:
   password: imooc
 
 ## 开启所有actuator-endpoint - 配置中心
-#management:
-#  endpoint:
-#    health:
-#      show-details: always
-#  endpoints:
-#    web:
-#      exposure:
-#        include: '*'
+management:
+  endpoint:
+    health:
+      show-details: always
+  endpoints:
+    web:
+      exposure:
+        include: '*'
 
 hystrix:
   command:
