@@ -10,13 +10,13 @@ spring:
         driver-class-name: com.mysql.jdbc.Driver
         jdbc-url: jdbc:mysql://localhost:3306/foodie-user?useUnicode=true&autoReconnect=true&serverTimezone=UTC
         username: root
-        password: 123456
+        password: root
       slave0:
         type: com.zaxxer.hikari.HikariDataSource
         driver-class-name: com.mysql.jdbc.Driver
         jdbc-url: jdbc:mysql://localhost:3306/foodie-user-slave?useUnicode=true&autoReconnect=true&serverTimezone=UTC
         username: root
-        password: 123456
+        password: root
     sharding:
       master-slave-rules:
         ms:
@@ -40,9 +40,13 @@ mybatis:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
 
 redisson:
-  address: redis://192.168.1.105:6379
-  password: imooc
+  address: redis://127.0.0.1:6379
+  #password: imooc
 
+eureka:
+  client:
+    serviceUrl:
+      defaultZone: http://localhost:20000/eureka/
 ## 开启所有actuator-endpoint - 配置中心
 management:
   endpoint:

@@ -165,7 +165,7 @@ public class PassportController extends BaseController {
         UserVO userVO = buildUserVO(userResult, token);
         String userResultStr = buildUserVOStr(userVO);
         CookieUtils.setCookie(request, response, USER_LOGIN_COOKIE_NAME, userResultStr, true);
-        redisOperator.set(token, userResultStr);
+        redisOperator.set(token, userResultStr,7200);
         return userVO;
     }
 

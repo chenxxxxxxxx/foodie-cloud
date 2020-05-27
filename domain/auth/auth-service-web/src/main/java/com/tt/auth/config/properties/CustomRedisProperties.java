@@ -11,7 +11,7 @@ import org.springframework.context.annotation.Configuration;
 @Data
 @Configuration
 @ConfigurationProperties(prefix = "redisson")
-@ConditionalOnProperty("redisson.password")
+//@ConditionalOnProperty("redisson.password")
 public class CustomRedisProperties {
 
     private int timeout = 3000;
